@@ -1,159 +1,365 @@
-package JetBrainsAcademy;
+package tictactoe;
 
 import java.util.Scanner;
+import java.util.Random;
 
-public class TicTacToe {
+public class Main {
+    private static Scanner scanner = new Scanner(System.in);
 
-    static Scanner scanner = new Scanner(System.in);
+    private static STATES state = STATES.START;
+    private static PLAYING_MODES playingModeX;
+    private static PLAYING_MODES playingModeO;
+    private static String[] arrayInput = new String[ 9 ];
+    private static String input = null;
+    private static String[] arrayInputCoordinates;
+    private static int x = 0;
+    private static int o = 0;
+    private static String player;
+    private static String nonPlayer;
+    private static int positionOnArray = 10;
 
-    static STATES state = STATES.GAME_NOT_FINISHED;
-    static String[] arrayInput = new String[ 9 ];
-    static String input = null;
-    static String[] arrayInputCoordinates;
-    static int[] arrayCoordinates;
-    static int x = 0;
-    static int o = 0;
-    static int positionOnArray = 10;
+    static String getPlayer(){
+        return player;
+    }
 
-    public enum STATES {
-        GAME_NOT_FINISHED, CHECK_OF_THE_INPUT, PRINT_THE_GAME, CHECK_FOR_WINNER, DRAW, WINNER, FINISHED
+    public static void setPlayer(String player){
+        Main.player = player;
+    }
+
+    static String getNonPlayer(){
+        return nonPlayer;
+    }
+
+    public static void setNonPlayer(String nonPlayer){
+        Main.nonPlayer = nonPlayer;
+    }
+
+    public static void setState(STATES state){
+        Main.state = state;
+    }
+
+    public static void setPlayingModeX(PLAYING_MODES playingModeX){
+        Main.playingModeX = playingModeX;
+    }
+
+    public static void setPlayingModeO(PLAYING_MODES playingModeO){
+        Main.playingModeO = playingModeO;
+    }
+
+    public static void setArrayInput(String[] arrayInput){
+        Main.arrayInput = arrayInput;
+    }
+
+    public static void setInput(String input){
+        Main.input = input;
+    }
+
+    public static void setArrayInputCoordinates(String[] arrayInputCoordinates){
+        Main.arrayInputCoordinates = arrayInputCoordinates;
+    }
+
+    public static void setX(int x){
+        Main.x = x;
+    }
+
+    public static void setO(int o){
+        Main.o = o;
+    }
+
+    static void setPositionOnArray(int positionOnArray){
+        Main.positionOnArray = positionOnArray;
+    }
+
+
+    public static STATES getState(){
+        return state;
+    }
+
+    public static PLAYING_MODES getPlayingModeX(){
+        return playingModeX;
+    }
+
+    public static PLAYING_MODES getPlayingModeO(){
+        return playingModeO;
+    }
+
+    static String[] getArrayInput(){
+        return arrayInput;
+    }
+
+    public static String getInput(){
+        return input;
+    }
+
+    public static String[] getArrayInputCoordinates(){
+        return arrayInputCoordinates;
+    }
+
+    public static int getX(){
+        return x;
+    }
+
+    public static int getO(){
+        return o;
+    }
+
+    static int getPositionOnArray(){
+        return positionOnArray;
+    }
+
+    enum STATES {
+        START, EXIT, GAME_NOT_FINISHED, CHECK_OF_THE_INPUT, CHECK_OF_THE_FIELD, PRINT_THE_GAME, CHECK_FOR_WINNER, DRAW, WINNER, FINISHED, COMPUTER_TURN
+    }
+    enum PLAYING_MODES {
+        user, easy, medium, hard
     }
 
     public static void main(String[] args){
-
-        for ( int i = 0 ; i < arrayInput.length ; i++ ) {
-            arrayInput[ i ] = " ";
-        }
-
-        printTheGame();
-
-        while (!state.equals(STATES.FINISHED)) {
-            switch (state) {
-                case GAME_NOT_FINISHED:
-                    System.out.println("Enter the coordinates:");
-                    input = scanner.nextLine();
-                    state = STATES.PRINT_THE_GAME;
-                    definePosition();
-                case CHECK_OF_THE_INPUT:
-                    arrayInputCoordinates = input.split(" ");
-                    state = STATES.PRINT_THE_GAME;
-                    checkTheCoordinates();
+        String inputCommand;
+        String[] commands;
+        boolean badParameters;
+        while (state.equals(STATES.START)) {
+            badParameters = false;
+            System.out.print("Input command: ");
+            inputCommand = scanner.nextLine();
+            commands = inputCommand.split(" ");
+            switch (commands[ 0 ]) {
+                case "start":
+                    if (commands.length != 3) {
+                        badParameters = true;
+                    } else {
+                        switch (commands[ 1 ]) {
+                            case "user":
+                                playingModeX = PLAYING_MODES.user;
+                                break;
+                            case "easy":
+                                playingModeX = PLAYING_MODES.easy;
+                                break;
+                            case "medium":
+                                playingModeX = PLAYING_MODES.medium;
+                                break;
+                            case "hard":
+                                playingModeX = PLAYING_MODES.hard;
+                                break;
+                            default:
+                                badParameters = true;
+                        }
+                        switch (commands[ 2 ]) {
+                            case "user":
+                                playingModeO = PLAYING_MODES.user;
+                                break;
+                            case "easy":
+                                playingModeO = PLAYING_MODES.easy;
+                                break;
+                            case "medium":
+                                playingModeO = PLAYING_MODES.medium;
+                                break;
+                            case "hard":
+                                playingModeO = PLAYING_MODES.hard;
+                                break;
+                            default:
+                                badParameters = true;
+                        }
+                    }
                     break;
-                case PRINT_THE_GAME:
-                    checkIfPositionIsOccupied();
-                    state = STATES.CHECK_FOR_WINNER;
-                    break;
-                case CHECK_FOR_WINNER:
-                    state = STATES.GAME_NOT_FINISHED;
-                    checkForWinner();
-                    checkForDraw();
-                    break;
-                case DRAW:
-                    System.out.println("Draw");
-                    state = STATES.FINISHED;
-                    break;
-                case WINNER:
-                    announceWinner();
-                    state = STATES.FINISHED;
-                    break;
-                case FINISHED:
-                    break;
-            }
-        }
-    }
-        private static void printTheGame(){
-            System.out.println("---------");
-            for (int i = 0; i < arrayInput.length; i+=3) {
-                System.out.println("| " + arrayInput[i] + " " + arrayInput[i+1] + " " + arrayInput[i+2] + " |");
-            }
-            System.out.println("---------");
-        }
-        private static void definePosition(){
-            switch (input) {
-                case "1 1":
-                    positionOnArray = 6;
-                    break;
-                case "1 2":
-                    positionOnArray = 3;
-                    break;
-                case "1 3":
-                    positionOnArray = 0;
-                    break;
-                case "2 1":
-                    positionOnArray = 7;
-                    break;
-                case "2 2":
-                    positionOnArray = 4;
-                    break;
-                case "2 3":
-                    positionOnArray = 1;
-                    break;
-                case "3 1":
-                    positionOnArray = 8;
-                    break;
-                case "3 2":
-                    positionOnArray = 5;
-                    break;
-                case "3 3":
-                    positionOnArray = 2;
+                case "exit":
+                    state = STATES.EXIT;
                     break;
                 default:
-                    state = STATES.CHECK_OF_THE_INPUT;
+                    badParameters = true;
             }
-        }
-        private static void checkTheCoordinates(){
-            for ( int i = 0 ; i < arrayInputCoordinates.length ; i++ ) {
-                arrayCoordinates = new int[ arrayInputCoordinates.length ];
-                try {
-                    arrayCoordinates[ i ] = Integer.parseInt(arrayInputCoordinates[ i ]);
-                } catch (java.lang.NumberFormatException e) {
-                    System.out.println("You should enter numbers!");
-                    state = STATES.GAME_NOT_FINISHED;
-                    break;
-                }
-                if (arrayCoordinates[ i ] > arrayInput.length / 3) {
-                    System.out.println("Coordinates should be from 1 to 3!");
-                    state = STATES.GAME_NOT_FINISHED;
-                    break;
-                }
+            if (badParameters) {
+                System.out.println("Bad parameters!");
             }
-        }
-        private static void checkIfPositionIsOccupied(){
-            if (!arrayInput[ positionOnArray ].equals(" ")) {
-                System.out.println("This cell is occupied! Choose another one!");
+            else if (state.equals(STATES.START)){
+                x = 0;
+                o = 0;
+                for ( int i = 0 ; i < arrayInput.length ; i++ ) {
+                    arrayInput[ i ] = " ";
+                }
                 state = STATES.GAME_NOT_FINISHED;
-            } else {
-                determinePlayer();
+                printTheGame();
             }
-        }
-        private static void determinePlayer() {
-            if (x == o) {
-                arrayInput[ positionOnArray ] = "X";
-                x++;
-            } else {
-                arrayInput[ positionOnArray ] = "O";
-                o++;
+            while (!state.equals(STATES.START)&&!state.equals(STATES.EXIT)) {
+                if (((x == o && !playingModeX.equals(PLAYING_MODES.user)) || (x != o && !playingModeO.equals(PLAYING_MODES.user))) && state.equals(STATES.GAME_NOT_FINISHED)) {
+                    state = STATES.COMPUTER_TURN;
+                }
+                switch (state) {
+                     case GAME_NOT_FINISHED:
+                        System.out.println("Enter the coordinates:");
+                        input = scanner.nextLine();
+                        state = STATES.CHECK_OF_THE_FIELD;//
+                        definePosition();
+                        break;
+                    case CHECK_OF_THE_INPUT:
+                        arrayInputCoordinates = input.split(" ");
+                        state = STATES.GAME_NOT_FINISHED;//
+                        checkTheError();
+                        break;
+                    case CHECK_OF_THE_FIELD:
+                        state = STATES.PRINT_THE_GAME;//
+                        checkIfPositionIsOccupied();
+                        break;
+                    case PRINT_THE_GAME:
+                        state = STATES.CHECK_FOR_WINNER;
+                        determinePlayer();
+                        makeMove();
+                        printTheGame();
+                        break;
+                    case CHECK_FOR_WINNER:
+                        state = STATES.GAME_NOT_FINISHED;
+                        checkForWinner();
+                        checkForDraw();
+                        break;
+                    case DRAW:
+                        System.out.println("Draw");
+                        state = STATES.FINISHED;
+                        break;
+                    case WINNER:
+                        announceWinner();
+                        state = STATES.FINISHED;
+                        break;
+                    case COMPUTER_TURN:
+                        PLAYING_MODES move;
+                        ComputerEasy easy = new ComputerEasy();
+                        Computer medium = new ComputerMedium();
+                        ComputerHard hard = new ComputerHard();
+
+                        if(x==o){
+                            move = playingModeX;
+                        } else {
+                            move = playingModeO;
+                        }
+                        switch (move) {
+                            case easy:
+                                System.out.println("Making move level \"easy\"");
+                                determinePlayer();
+                                easy.makingMove();
+                                printTheGame();
+                                state = STATES.CHECK_FOR_WINNER;
+                                break;
+                            case medium:
+                                System.out.println("Making move level \"medium\"");
+                                determinePlayer();
+                                medium.makingMove();
+                                if(Computer.waitingForMove){
+                                    easy.makingMove();
+                                }
+                                printTheGame();
+                                state = STATES.CHECK_FOR_WINNER;
+                                break;
+                            case hard:
+                                System.out.println("Making move level \"hard\"");
+                                determinePlayer();
+                                hard.makingMove();
+                                printTheGame();
+                                state = STATES.CHECK_FOR_WINNER;
+                                break;
+                        }
+                        break;
+                    case FINISHED:
+                        state = STATES.START;
+                        break;
+                }
             }
-            printTheGame();
-        }
-        private static void checkForWinner(){
-        if ((arrayInput[0].equals(arrayInput[arrayInput.length/2]))&&(arrayInput[0].equals(arrayInput[arrayInput.length-1]))&&!arrayInput[0].equals(" ")) {
-        state = STATES.WINNER;
-        } else if ((arrayInput[2].equals(arrayInput[arrayInput.length/2]))&&(arrayInput[2].equals(arrayInput[6]))&&(!arrayInput[2].equals(" "))) {
-        state = STATES.WINNER;
-        } else {
-        for ( int i = 0 ; i < arrayInput.length / 3 ; i++ ) {
-        if ((arrayInput[ i ].equals(arrayInput[ i + arrayInput.length / 3 ])) && (arrayInput[ i ].equals(arrayInput[ (i + arrayInput.length / 3 * 2) ])) && !arrayInput[ i ].equals(" ")) {
-            state = STATES.WINNER;
-            break;
         }
     }
-        for ( int i = 0 ; i < arrayInput.length ; i += 3 ) {
-        if ((arrayInput[ i ].equals(arrayInput[ i + 1 ])) && (arrayInput[ i ].equals(arrayInput[ (i + 2) ]) && !arrayInput[ i ].equals(" "))) {
+    private static void printTheGame(){
+        System.out.println("---------");
+        for (int i = 0; i < getArrayInput().length; i+=3) {
+            System.out.println("| " + getArrayInput()[i] + " " + getArrayInput()[i+1] + " " + getArrayInput()[i+2] + " |");
+        }
+        System.out.println("---------");
+    }
+    private static void definePosition(){
+        switch (input) {
+            case "1 1":
+                positionOnArray = 6;
+                break;
+            case "1 2":
+                positionOnArray = 3;
+                break;
+            case "1 3":
+                positionOnArray = 0;
+                break;
+            case "2 1":
+                positionOnArray = 7;
+                break;
+            case "2 2":
+                positionOnArray = 4;
+                break;
+            case "2 3":
+                positionOnArray = 1;
+                break;
+            case "3 1":
+                positionOnArray = 8;
+                break;
+            case "3 2":
+                positionOnArray = 5;
+                break;
+            case "3 3":
+                positionOnArray = 2;
+                break;
+            default:
+                state = STATES.CHECK_OF_THE_INPUT;
+        }
+    }
+    private static void checkTheError(){
+        int[] arrayCoordinates;
+        for ( int i = 0 ; i < arrayInputCoordinates.length ; i++ ) {
+            arrayCoordinates = new int[ arrayInputCoordinates.length ];
+            try {
+                arrayCoordinates[ i ] = Integer.parseInt(arrayInputCoordinates[ i ]);
+            } catch (java.lang.NumberFormatException e) {
+                System.out.println("You should enter numbers!");
+                state = STATES.GAME_NOT_FINISHED;
+                break;
+            }
+            if (arrayCoordinates[ i ] > arrayInput.length / 3) {
+                System.out.println("Coordinates should be from 1 to 3!");
+                state = STATES.GAME_NOT_FINISHED;
+                break;
+            }
+        }
+    }
+    private static void checkIfPositionIsOccupied(){
+        if (!arrayInput[ positionOnArray ].equals(" ")) {
+            System.out.println("This cell is occupied! Choose another one!");
+            state = STATES.GAME_NOT_FINISHED;
+        }
+    }
+    static void determinePlayer() {
+        if (x == o) {
+            x++;
+            player = "X";
+            nonPlayer = "O";
+        } else {
+            o++;
+            player = "O";
+            nonPlayer = "X";
+        }
+    }
+    static void makeMove() {
+        arrayInput[positionOnArray] = player;
+    }
+    private static void checkForWinner(){
+        if ((arrayInput[0].equals(arrayInput[arrayInput.length/2]))&&(arrayInput[0].equals(arrayInput[arrayInput.length-1]))&&!arrayInput[0].equals(" ")) {
             state = STATES.WINNER;
-            break;
-        }
-        }
+        } else if ((arrayInput[2].equals(arrayInput[arrayInput.length/2]))&&(arrayInput[2].equals(arrayInput[6]))&&(!arrayInput[2].equals(" "))) {
+            state = STATES.WINNER;
+        } else {
+            for ( int i = 0 ; i < arrayInput.length / 3 ; i++ ) {
+                if ((arrayInput[ i ].equals(arrayInput[ i + arrayInput.length / 3 ])) && (arrayInput[ i ].equals(arrayInput[ (i + arrayInput.length / 3 * 2) ])) && !arrayInput[ i ].equals(" ")) {
+                    state = STATES.WINNER;
+                    break;
+                }
+            }
+            for ( int i = 0 ; i < arrayInput.length ; i += 3 ) {
+                if ((arrayInput[ i ].equals(arrayInput[ i + 1 ])) && (arrayInput[ i ].equals(arrayInput[ (i + 2) ]) && !arrayInput[ i ].equals(" "))) {
+                    state = STATES.WINNER;
+                    break;
+                }
+            }
         }
     }
     private static void checkForDraw(){
@@ -168,4 +374,636 @@ public class TicTacToe {
             System.out.println("X wins");
         }
     }
+}
+class Computer {
+    static boolean occupied = true;
+    static boolean waitingForMove = true;
+    static Random random = new Random();
+    public void makingMove(){
+    }
+}
+class ComputerEasy extends Computer{
+    @Override
+    public void makingMove(){
+        occupied = true;
+        while (occupied) {
+            Main.setPositionOnArray(random.nextInt(9));
+            if (Main.getArrayInput()[ Main.getPositionOnArray()].equals(" ")) {
+                Main.makeMove();
+                occupied = false;
+            }
         }
+    }
+}
+class ComputerMedium extends Computer{
+    @Override
+    public void makingMove(){
+        int line;
+        waitingForMove = true;
+        occupied = true;
+
+        for(int i = 0 ; i < Main.getArrayInput().length / 3 ; i++ ) {
+            line = 0;
+            for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                if (Main.getArrayInput()[i + Main.getArrayInput().length / 3 * j].equals(Main.getPlayer())) {
+                    line++;
+                }
+            }
+            if(line==2&&waitingForMove){
+                for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                    if (Main.getArrayInput()[i + Main.getArrayInput().length / 3 * j].equals(" ")) {
+                        Main.setPositionOnArray((i + Main.getArrayInput().length / 3 * j));
+                        waitingForMove = false;
+                        Main.makeMove();
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < Main.getArrayInput().length; i+=3) {
+            line = 0;
+            for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                if(Main.getArrayInput()[i + j].equals(Main.getPlayer())) {
+                    line++;
+                }
+            }
+            if(line==2&&waitingForMove) {
+                for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                    if(Main.getArrayInput()[i+j].equals(" ")) {
+                        Main.setPositionOnArray(i+j);
+                        waitingForMove = false;
+                        Main.makeMove();
+                        break;
+                    }
+                }
+            }
+        }
+
+        line = 0;
+        for(int i = 0; i < Main.getArrayInput().length; i += 4) {
+            if(Main.getArrayInput()[i].equals(Main.getPlayer())){
+                line++;
+            }
+        }
+        if(line==2&&waitingForMove) {
+            for(int i = 0; i < Main.getArrayInput().length; i+=4) {
+                if(Main.getArrayInput()[i].equals(" ")){
+                    Main.setPositionOnArray(i);
+                    waitingForMove = false;
+                    Main.makeMove();
+                    break;
+                }
+            }
+        }
+
+        line = 0;
+        for(int i = 2; i < Main.getArrayInput().length-2; i+=2){
+            if(Main.getArrayInput()[i].equals(Main.getPlayer())){
+                line++;
+            }
+        }
+        if(line==2&&waitingForMove) {
+            for(int i = 2; i < Main.getArrayInput().length-2; i+=2) {
+                if(Main.getArrayInput()[i].equals(" ")){
+                    Main.setPositionOnArray(i);
+                    waitingForMove = false;
+                    Main.makeMove();
+                    break;
+                }
+            }
+        }
+
+        for(int i = 0 ; i < Main.getArrayInput().length / 3 ; i++ ) {
+            line = 0;
+            for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                if (Main.getArrayInput()[i + Main.getArrayInput().length / 3 * j].equals(Main.getNonPlayer())) {
+                    line++;
+                }
+            }
+            if(line==2&&waitingForMove){
+                for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                    if (Main.getArrayInput()[i + Main.getArrayInput().length / 3 * j].equals(" ")) {
+                        Main.setPositionOnArray(i + Main.getArrayInput().length / 3 * j);
+                        waitingForMove = false;
+                        Main.makeMove();
+                        break;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < Main.getArrayInput().length; i+=3) {
+            line = 0;
+            for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                if(Main.getArrayInput()[i + j].equals(Main.getNonPlayer())) {
+                    line++;
+                }
+            }
+            if(line==2&&waitingForMove) {
+                for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                    if(Main.getArrayInput()[i+j].equals(" ")) {
+                        Main.setPositionOnArray(i+j);
+                        waitingForMove = false;
+                        Main.makeMove();
+                        break;
+                    }
+                }
+            }
+        }
+
+        line = 0;
+        for(int i = 0; i < Main.getArrayInput().length; i += 4) {
+            if(Main.getArrayInput()[i].equals(Main.getNonPlayer())){
+                line++;
+            }
+        }
+        if(line==2&&waitingForMove) {
+            for(int i = 0; i < Main.getArrayInput().length; i+=4) {
+                if(Main.getArrayInput()[i].equals(" ")){
+                    Main.setPositionOnArray(i);
+                    waitingForMove = false;
+                    Main.makeMove();
+                    break;
+                }
+            }
+        }
+
+        line = 0;
+        for(int i = 2; i < Main.getArrayInput().length-2; i+=2){
+            if(Main.getArrayInput()[i].equals(Main.getNonPlayer())){
+                line++;
+            }
+        }
+        if(line==2&&waitingForMove) {
+            for(int i = 2; i < Main.getArrayInput().length-2; i+=2) {
+                if(Main.getArrayInput()[i].equals(" ")){
+                    Main.setPositionOnArray(i);
+                    waitingForMove = false;
+                    Main.makeMove();
+                    break;
+                }
+            }
+        }
+    }
+}
+class ComputerHard extends Computer {
+    int emptyField;
+    int xField;
+    int oField;
+
+    public int calculateMove(){
+        int move = 0;
+        for ( int i = 0 ; i < Main.getArrayInput().length ; i++ ) {
+            if (Main.getArrayInput()[ i ].equals(" ")) {
+                move++;
+            }
+        }
+        return Main.getArrayInput().length - move + 1;
+    }
+
+    public int calculatePositionOPlayer2ndMove(){
+        int[] fields = new int[ Main.getArrayInput().length ];
+        int maxValue = 0;
+        int positionToPlay = 0;
+
+        for ( int i = 0 ; i < Main.getArrayInput().length / 3 ; i++ ) { //1
+            emptyField = 0;
+            xField = 0;
+            for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(Main.getNonPlayer())) {
+                    xField++;
+                } else if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                    emptyField++;
+                }
+            }
+            if (emptyField == 2 && xField == 1) {
+                for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                    if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                        fields[ (i + Main.getArrayInput().length / 3 * j) ]++;
+                    }
+                }
+            }
+        }
+
+        for ( int i = 0 ; i < Main.getArrayInput().length ; i += 3 ) { //2
+            emptyField = 0;
+            xField = 0;
+            oField = 0;
+            for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                if (Main.getArrayInput()[ i + j ].equals(" ")) {
+                    emptyField++;
+                } else if (Main.getArrayInput()[ i + j ].equals(Main.getNonPlayer())) {
+                    xField++;
+                }
+            }
+            if (emptyField == 2 && xField == 1) {
+                for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                    if (Main.getArrayInput()[ i + j ].equals(" ")) {
+                        fields[ i + j ]++;
+                    }
+                }
+            }
+        }
+
+        emptyField = 0;
+        xField = 0;
+        for ( int i = 0 ; i < Main.getArrayInput().length ; i += 4 ) { //3
+            if (Main.getArrayInput()[ i ].equals(" ")) {
+                emptyField++;
+            } else if (Main.getArrayInput()[ i ].equals(Main.getNonPlayer())) {
+                xField++;
+            }
+        }
+        if (emptyField == 2 && xField == 1) {
+            for ( int i = 0 ; i < Main.getArrayInput().length ; i += 4 ) {
+                if (Main.getArrayInput()[ i ].equals(" ")) {
+                    fields[ i ]++;
+
+                }
+            }
+        }
+
+        emptyField = 0;
+        xField = 0;
+        for ( int i = 2 ; i < Main.getArrayInput().length - 2 ; i += 2 ) { //4
+            if (Main.getArrayInput()[ i ].equals(" ")) {
+                emptyField++;
+            } else if (Main.getArrayInput()[ i ].equals(Main.getNonPlayer())) {
+                xField++;
+            }
+        }
+        if (emptyField == 2 && xField == 1) {
+            for ( int i = 2 ; i < Main.getArrayInput().length - 2 ; i += 2 ) {
+                if (Main.getArrayInput()[ i ].equals(" ")) {
+                    fields[ i ]++;
+                }
+            }
+        }
+
+        for ( int i = 0 ; i < Main.getArrayInput().length / 3 ; i++ ) { //5
+            emptyField = 0;
+            oField = 0;
+            for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(Main.getPlayer())) {
+                    oField++;
+                } else if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                    emptyField++;
+                }
+            }
+            if (emptyField == 2 && oField == 1) {
+                for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                    if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                        fields[ (i + Main.getArrayInput().length / 3 * j) ]++;
+                    }
+                }
+            }
+        }
+
+        for ( int i = 0 ; i < Main.getArrayInput().length ; i += 3 ) { //6
+            emptyField = 0;
+            oField = 0;
+            for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                if (Main.getArrayInput()[ i + j ].equals(" ")) {
+                    emptyField++;
+                } else if (Main.getArrayInput()[ i + j ].equals(Main.getPlayer())) {
+                    oField++;
+                }
+            }
+            if (emptyField == 2 && oField == 1) {
+                for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                    if (Main.getArrayInput()[ i + j ].equals(" ")) {
+                        fields[ i + j ]++;
+                    }
+                }
+            }
+        }
+
+        emptyField = 0;
+        oField = 0;
+        for ( int i = 0 ; i < Main.getArrayInput().length ; i += 4 ) { //7
+            if (Main.getArrayInput()[ i ].equals(" ")) {
+                emptyField++;
+            } else if (Main.getArrayInput()[ i ].equals(Main.getPlayer())) {
+                oField++;
+            }
+        }
+        if (emptyField == 2 && oField == 1) {
+            for ( int i = 0 ; i < Main.getArrayInput().length ; i += 4 ) {
+                if (Main.getArrayInput()[ i ].equals(" ")) {
+                    fields[ i ]++;
+
+                }
+            }
+        }
+
+        emptyField = 0;
+        oField = 0;
+        for ( int i = 2 ; i < Main.getArrayInput().length - 2 ; i += 2 ) { //8
+            if (Main.getArrayInput()[ i ].equals(" ")) {
+                emptyField++;
+            } else if (Main.getArrayInput()[ i ].equals(Main.getPlayer())) {
+                oField++;
+            }
+        }
+        if (emptyField == 2 && oField == 1) {
+            for ( int i = 2 ; i < Main.getArrayInput().length - 2 ; i += 2 ) {
+                if (Main.getArrayInput()[ i ].equals(" ")) {
+                    fields[ i ]++;
+                }
+            }
+        }
+
+        for ( int i = 0 ; i < fields.length ; i++ ) {
+            if (fields[ i ] > maxValue) {
+                maxValue = fields[ i ];
+                positionToPlay = i;
+            }
+        }
+        return positionToPlay;
+    }
+
+
+    @Override
+    public void makingMove(){
+
+        ComputerMedium mediumHard = new ComputerMedium();
+        if (Main.getPlayer().equals("X")) {
+            switch (calculateMove()) {
+                case 1:
+                    Main.setPositionOnArray(0);
+                    Main.makeMove();
+                    break;
+                case 3:
+                    if (Main.getArrayInput()[ 4 ].equals("O")) {
+                        Main.setPositionOnArray(8);
+                        Main.makeMove();
+                    } else {
+                    if (Main.getArrayInput()[ 1 ].equals(" ") && Main.getArrayInput()[ 2 ].equals(" ")) {
+                        Main.setPositionOnArray(2);
+                        Main.makeMove();
+                    } else if (Main.getArrayInput()[ 3 ].equals(" ") && Main.getArrayInput()[ 6 ].equals(" ")) {
+                        Main.setPositionOnArray(6);
+                        Main.makeMove();
+                    }}
+                    break;
+                case 5:
+                    mediumHard.makingMove();
+                    if (Computer.waitingForMove) {
+                        if (Main.getArrayInput()[ 1 ].equals(" ") && Main.getArrayInput()[ 2 ].equals(" ")) {
+                            Main.setPositionOnArray(2);
+                            Main.makeMove();
+                        } else if (Main.getArrayInput()[ 3 ].equals(" ") && Main.getArrayInput()[ 6 ].equals(" ")) {
+                            Main.setPositionOnArray(6);
+                            Main.makeMove();
+                        } else {
+                            Main.setPositionOnArray(8);
+                            Main.makeMove();
+                        }
+                    }
+                    break;
+                case 7:
+                    mediumHard.makingMove();
+                    for ( int i = 0 ; i < Main.getArrayInput().length / 3 ; i++ ) { //1
+                        emptyField = 0;
+                        xField = 0;
+                        for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                            if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(Main.getPlayer())) {
+                                xField++;
+                            } else if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                                emptyField++;
+                            }
+                        }
+                        if (emptyField == 2 && xField == 1 && waitingForMove) {
+                            for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                                if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                                    Main.setPositionOnArray((i + Main.getArrayInput().length / 3 * j));
+                                    waitingForMove = false;
+                                    Main.makeMove();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    for (int i = 0; i < Main.getArrayInput().length; i+=3) { //2
+                        emptyField = 0;
+                        xField = 0;
+                        for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                            if(Main.getArrayInput()[i + j].equals(" ")) {
+                                emptyField++;
+                            } else if (Main.getArrayInput()[i + j].equals(Main.getPlayer())) {
+                                xField++;
+                            }
+                        }
+                        if(emptyField==2&&xField==1&&waitingForMove) {
+                            for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                                if(Main.getArrayInput()[i+j].equals(" ")) {
+                                    Main.setPositionOnArray(i+j);
+                                    waitingForMove = false;
+                                    Main.makeMove();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    emptyField = 0;
+                    xField = 0;
+                    for(int i = 0; i < Main.getArrayInput().length; i += 4) { //3
+                        if(Main.getArrayInput()[i].equals(" ")){
+                            emptyField++;
+                        } else if (Main.getArrayInput()[i].equals(Main.getPlayer())) {
+                            xField++;
+                        }
+                    }
+                    if(emptyField==2&&xField==1&&waitingForMove) {
+                        for(int i = 0; i < Main.getArrayInput().length; i+=4) {
+                            if(Main.getArrayInput()[i].equals(" ")){
+                                Main.setPositionOnArray(i);
+                                waitingForMove = false;
+                                Main.makeMove();
+                                break;
+                            }
+                        }
+                    }
+
+                    emptyField = 0;
+                    xField = 0;
+                    for(int i = 2; i < Main.getArrayInput().length-2; i+=2){ //4
+                        if(Main.getArrayInput()[i].equals(" ")){
+                            emptyField++;
+                        } else if (Main.getArrayInput()[i].equals(Main.getPlayer())) {
+                            xField++;
+                        }
+                    }
+                    if(emptyField==2&&xField==1&&waitingForMove) {
+                        for(int i = 2; i < Main.getArrayInput().length-2; i+=2) {
+                            if(Main.getArrayInput()[i].equals(" ")){
+                                Main.setPositionOnArray(i);
+                                waitingForMove = false;
+                                Main.makeMove();
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case 9:
+                    for (int i = 0; i < Main.getArrayInput().length; i++) {
+                        if (Main.getArrayInput()[i].equals(" ")) {
+                            Main.setPositionOnArray(i);
+                            waitingForMove = false;
+                            Main.makeMove();
+                            break;
+                        }
+                    }
+            }
+        } else {
+            switch (calculateMove()){
+                case 2:
+                    if (Main.getArrayInput()[4].equals(" ")) {
+                        Main.setPositionOnArray(4);
+                    } else {
+                        Main.setPositionOnArray(0);
+                    }
+                    waitingForMove = false;
+                    Main.makeMove();
+                    break;
+                case 4:
+                    mediumHard.makingMove(); // here I need only X check, without the O check
+                    if(waitingForMove) {
+                        emptyField = 0;
+                        for(int i = 0; i < Main.getArrayInput().length; i += 4) { //3
+                            if(Main.getArrayInput()[i].equals(" ")){
+                                emptyField++;
+                            }
+                        }
+                        if(emptyField==0) {
+                                    Main.setPositionOnArray(1);
+                                    waitingForMove = false;
+                                    Main.makeMove();
+                                    break;
+                                }
+
+                        emptyField = 0;
+                        for(int i = 2; i < Main.getArrayInput().length-2; i+=2){ //4
+                            if(Main.getArrayInput()[i].equals(" ")){
+                                emptyField++;
+                            }
+                        }
+                        if(emptyField==0) {
+                                    Main.setPositionOnArray(1);
+                                    waitingForMove = false;
+                                    Main.makeMove();
+                                    break;
+                                }
+                            }
+
+                   else if (waitingForMove){
+                        Main.setPositionOnArray(calculatePositionOPlayer2ndMove());
+                        waitingForMove = false;
+                        Main.makeMove();
+                    }
+                    break;
+                case 6:
+                    mediumHard.makingMove();
+
+                    for ( int i = 0 ; i < Main.getArrayInput().length / 3 ; i++ ) { //1
+                        emptyField = 0;
+                        oField = 0;
+                        for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                            if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(Main.getPlayer())) {
+                                oField++;
+                            } else if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                                emptyField++;
+                            }
+                        }
+                        if (emptyField == 2 && oField == 1 && waitingForMove) {
+                            for ( int j = 0 ; j < Main.getArrayInput().length / 3 ; j++ ) {
+                                if (Main.getArrayInput()[ i + Main.getArrayInput().length / 3 * j ].equals(" ")) {
+                                    Main.setPositionOnArray((i + Main.getArrayInput().length / 3 * j));
+                                    waitingForMove = false;
+                                    Main.makeMove();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    for (int i = 0; i < Main.getArrayInput().length; i+=3) { //2
+                        emptyField = 0;
+                        oField = 0;
+                        for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                            if(Main.getArrayInput()[i + j].equals(" ")) {
+                                emptyField++;
+                            } else if (Main.getArrayInput()[i + j].equals(Main.getPlayer())) {
+                                oField++;
+                            }
+                        }
+                        if(emptyField==2&&oField==1&&waitingForMove) {
+                            for (int j = 0; j < Main.getArrayInput().length / 3; j++) {
+                                if(Main.getArrayInput()[i+j].equals(" ")) {
+                                    Main.setPositionOnArray(i+j);
+                                    waitingForMove = false;
+                                    Main.makeMove();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    emptyField = 0;
+                    oField = 0;
+                    for(int i = 0; i < Main.getArrayInput().length; i += 4) { //3
+                        if(Main.getArrayInput()[i].equals(" ")){
+                            emptyField++;
+                        } else if (Main.getArrayInput()[i].equals(Main.getPlayer())) {
+                            oField++;
+                        }
+                    }
+                    if(emptyField==2&&oField==1&&waitingForMove) {
+                        for(int i = 0; i < Main.getArrayInput().length; i+=4) {
+                            if(Main.getArrayInput()[i].equals(" ")){
+                                Main.setPositionOnArray(i);
+                                waitingForMove = false;
+                                Main.makeMove();
+                                break;
+                            }
+                        }
+                    }
+
+                    emptyField = 0;
+                    oField = 0;
+                    for(int i = 2; i < Main.getArrayInput().length-2; i+=2){ //4
+                        if(Main.getArrayInput()[i].equals(" ")){
+                            emptyField++;
+                        } else if (Main.getArrayInput()[i].equals(Main.getPlayer())) {
+                            oField++;
+                        }
+                    }
+                    if(emptyField==2&&oField==1&&waitingForMove) {
+                        for(int i = 2; i < Main.getArrayInput().length-2; i+=2) {
+                            if(Main.getArrayInput()[i].equals(" ")){
+                                Main.setPositionOnArray(i);
+                                waitingForMove = false;
+                                Main.makeMove();
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case 8:
+                    mediumHard.makingMove();
+                    if(waitingForMove) {
+                    for (int i = 0; i < Main.getArrayInput().length; i++) {
+                        if (Main.getArrayInput()[i].equals(" ")) {
+                            Main.setPositionOnArray(i);
+                            waitingForMove = false;
+                            Main.makeMove();
+                            break;
+                        }
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+}
+
