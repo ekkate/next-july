@@ -897,7 +897,7 @@ class ComputerHard extends Computer {
                                 }
                             }
 
-                   else if (waitingForMove){
+                   if (waitingForMove){
                         Main.setPositionOnArray(calculatePositionOPlayer2ndMove());
                         waitingForMove = false;
                         Main.makeMove();
