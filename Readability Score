@@ -1,0 +1,205 @@
+package readability;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Main {
+    public static void main(String[] args) {
+
+        String file = null;
+        try {
+            file = Files.readString(Path.of(args[0]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int sentences = 0;
+        int words;
+        int characters = 0;
+        int syllables = 0;
+        int polysyllables = 0;
+
+        Scanner scanner = new Scanner(System.in);
+
+        String[] w = file.split("\\s+");
+        words = w.length;
+
+        for(int i = 0; i < w.length; i++) {
+            String word = w[i];
+            if(String.valueOf(word.charAt(word.length()-1)).matches("[.!?]")) {
+                sentences++;
+            }
+            else if(i == w.length-1) {
+                sentences++;
+            }
+            characters += word.length();
+            int wordSyllables = countSyllablesInWord(word.replaceAll("[.,!?]", ""));
+            if(wordSyllables > 2) {
+                polysyllables++;
+            }
+            syllables += wordSyllables;
+        }
+
+        printCollectedInfo(characters, words, sentences, syllables, polysyllables);
+
+        System.out.println("Enter the score you want to calculate (ARI, FK, SMOG, CL, all): ");
+
+        String input = scanner.next();
+
+        LinkedHashMap<String, Double> results = new LinkedHashMap<>();
+        double score;
+
+        switch (input) {
+            case "ARI":
+                populateResults("Automated Readability Index", calculateARI(characters, words, sentences), results);
+                break;
+            case "FK":
+                populateResults("Flesch–Kincaid readability tests", calculateFK(words, sentences, syllables), results);
+                break;
+            case "SMOG":
+                populateResults("Simple Measure of Gobbledygook", calculateSMOG(sentences, polysyllables), results);
+                break;
+            case "CL":
+                populateResults("Coleman–Liau index", calculateCL((double) characters / (double) words * 100, (double) sentences / (double) words * 100), results);
+                break;
+            default:
+                populateResults("Automated Readability Index", calculateARI(characters, words, sentences), results);
+                populateResults("Flesch–Kincaid readability tests", calculateFK(words, sentences, syllables), results);
+                populateResults("Simple Measure of Gobbledygook", calculateSMOG(sentences, polysyllables), results);
+                populateResults("Coleman–Liau index", calculateCL((double) characters / (double) words * 100, (double) sentences / (double) words * 100), results);
+        }
+
+        printCalculatedInfo(results);
+    }
+
+    private static void populateResults(String method, double score, LinkedHashMap<String, Double> results) {
+        results.put(method, score);
+    }
+
+    private static void printCalculatedInfo(LinkedHashMap<String, Double> results) {
+        AtomicInteger summedAge = new AtomicInteger();
+        results.forEach((k, v) -> {
+            int age = readScoreResults((int) Math.round(v));
+            System.out.printf("%s: %.2f (about %d-year-olds).\n", k, v, age);
+            summedAge.addAndGet(age);
+        });
+
+
+        System.out.println("This text should be understood in average by "
+                + (double) summedAge.get() / (double) results.size()
+                + "-year-olds.");
+    }
+
+    private static void printCollectedInfo(int characters, int words, int sentences, int syllables, int polysyllables) {
+        System.out.println("Words: " + words);
+        System.out.println("Sentences: " + sentences);
+        System.out.println("Characters: " + characters);
+        System.out.println("Syllables: " + syllables);
+        System.out.println("Polysyllables: " + polysyllables);
+    }
+
+    private static double calculateARI(int characters, int words, int sentences) {
+        return 4.71 * ((double) characters / (double) words)
+                + 0.5 * ((double) words / (double) sentences) - 21.43;
+    }
+
+    private static double calculateSMOG(int sentences, int polySyllables) {
+        return 1.043 * Math.sqrt((double) polySyllables * 30 / (double) sentences) + 3.1291;
+    }
+
+    private static double calculateCL(double L, double S) {
+        return 0.0588 * L - 0.296 * S - 15.8;
+    }
+
+    private static double calculateFK(int words, int sentences, int syllables) {
+        return 0.39 * (double) words / (double) sentences
+                + 11.8 * (double) syllables /(double) words - 15.59;
+    }
+
+    private static int countSyllablesInWord(String word) {
+        int syllables = 0;
+        for(int i = 0; i < word.length()-1; i++) {
+            char letter = word.charAt(i);
+            char nextLetter = word.charAt(i+1);
+            if(String.valueOf(letter).matches("[aeiouyAEIOUY]") && !String.valueOf(nextLetter).matches("[aeiouyAEIOUY]")) {
+                syllables++;
+            }
+        }
+        char lastLetter = word.charAt(word.length()-1);
+        if(String.valueOf(lastLetter).matches("[aiouy]")) {
+            syllables++;
+        }
+        if(syllables == 0) {
+            syllables++;
+        }
+        return syllables;
+    }
+
+    private static int readScoreResults(int score) {
+        int age;
+        switch (score) {
+            case 1:
+                age = 6;
+                break;
+
+            case 2:
+                age = 7;
+                break;
+
+            case 3:
+                age = 9;
+                break;
+
+            case 4:
+                age = 10;
+                break;
+
+            case 5:
+                age = 11;
+                break;
+
+            case 6:
+                age = 12;
+                break;
+
+            case 7:
+                age = 13;
+                break;
+
+            case 8:
+                age = 14;
+                break;
+
+            case 9:
+                age = 15;
+                break;
+
+            case 10:
+                age = 16;
+                break;
+
+            case 11:
+                age = 17;
+                break;
+
+            case 12:
+                age = 18;
+                break;
+
+            case 13:
+                age = 24;
+                break;
+
+            case 14:
+                age = 25;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + score);
+        }
+        return age;
+    }
+}
